@@ -1,29 +1,21 @@
-
-
 // Pin configurations
 const int probePin = A4;
-const int startProbePin = A3;
-const short buttonPin = 7;
-const short ledPin = LED_BUILTIN;
+const int startProbePin = A2;
+const int ledPin = LED_BUILTIN;
 
 const short threshold = 300;
-const short startThreshold = 20;
-
-int probeValue;
-int startProbeValue;
+const short startThreshold = 50;
 
 bool testing = false;
-
-short buttonState = LOW;
-short sceneState = 0;  // 0 == dark
+bool done = false;
 
 unsigned long start;
 unsigned long measurement = 0;
 
 void setup() {
   // Pin mode configurations
+  pinMode(startProbePin, INPUT);
   pinMode(probePin, INPUT);
-  pinMode(buttonPin, INPUT);
   pinMode(ledPin, OUTPUT);
 
   // Initial LED state
@@ -37,21 +29,30 @@ void setup() {
 }
 
 void loop() {
+
+  // Serial.print("sp: ");
+  // Serial.print(analogRead(startProbePin));
+  // Serial.print("\tpp: ");
+  // Serial.println(analogRead(probePin));
+  // delay(200);
   if (testing) {
     // Measurement logic when testing
-    probeValue = analogRead(probePin);
-    if (probeValue > threshold) {
+    if (analogRead(probePin) > threshold) {
       measurement = millis() - start;
       testing = false;
+      done = true;
       digitalWrite(ledPin, LOW);
       Serial.println(measurement);
     }
   } else {
+    if (done) {
+      delay(500);
+      return;
+    }
     if (analogRead(startProbePin) > startThreshold) {
       testing = true;
+      Serial.println("Starting measurement ...");
       start = millis();
-    } else {
-      testing false;
     }
   }
 }
